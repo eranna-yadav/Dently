@@ -147,6 +147,10 @@
     $("#layer").innerHTML = `<div class="overlay" data-action="close-sheet"><div class="sheet" onclick="event.stopPropagation()"><div class="grab"></div>${html}</div></div>`;
   }
   const closeSheet = () => { $("#layer").innerHTML = ""; };
+  function ask(title, okLabel, onOk) {
+    sheet(`<h3>${esc(title)}</h3><div class="row" style="gap:10px"><button class="btn btn-outline grow" data-action="close-sheet-btn">Keep</button><button class="btn btn-danger grow" id="askOk">${esc(okLabel)}</button></div>`);
+    $("#askOk").onclick = () => { closeSheet(); onOk(); };
+  }
   const badge = (s) => `<span class="badge ${s}">${s}</span>`;
   const empty = (icon, title, text) => `<div class="empty"><div class="ic">${ic(icon, 28)}</div><b>${title}</b>${text}</div>`;
 
@@ -627,7 +631,8 @@
       }
       case "appt-tab": ui.apptTab = el.dataset.k; render(); break;
       case "toggle-rem": appt.reminder = !appt.reminder; save(); render(); toast(appt.reminder ? "Reminder on" : "Reminder off"); break;
-      case "cancel": if (confirm("Cancel this appointment?")) { appt.status = "cancelled"; save(); render(); toast("Appointment cancelled"); } break;
+      case "cancel": ask("Cancel this appointment?", "Yes, cancel", () => { appt.status = "cancelled"; save(); render(); toast("Appointment cancelled"); }); break;
+      case "close-sheet-btn": closeSheet(); break;
       case "reminders": showReminders(); break;
       case "edit-profile": editProfile(); break;
 
@@ -643,7 +648,7 @@
       }
       case "remove-doc": {
         const d = doctor(id);
-        if (confirm(`Remove ${d.name}?`)) { db.doctors = db.doctors.filter((x) => x.id !== id); save(); render(); toast("Doctor removed"); }
+        ask(`Remove ${d.name}?`, "Remove", () => { db.doctors = db.doctors.filter((x) => x.id !== id); save(); render(); toast("Doctor removed"); });
         break;
       }
     }
